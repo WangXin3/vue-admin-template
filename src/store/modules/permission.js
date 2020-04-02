@@ -37,14 +37,15 @@ import Layout from '@/layout/index'
 // }
 
 const state = {
-  routes: [],
-  addRoutes: []
+  routes: []
 }
 
 const mutations = {
   SET_ROUTES: (state, routes) => {
-    state.addRoutes = routes
     state.routes = constantRoutes.concat(routes)
+  },
+  DEL_ROUTES: (state) => {
+    state.routes = []
   }
 }
 
@@ -63,6 +64,10 @@ const actions = {
         resolve(accessedRoutes)
       })
     })
+  },
+
+  delRoutes({ commit }) {
+    commit('DEL_ROUTES')
   }
 }
 
@@ -84,7 +89,7 @@ export const filterAsyncRouter = (routers) => { // 遍历后台传来的路由�
 }
 
 export const loadView = (view) => {
-  return () => import('@/views/table/index.vue')
+  return resolve => require.ensure([], () => resolve(require('@/views' + view + '.vue')))
 }
 
 export default {
