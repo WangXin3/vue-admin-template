@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-export function getList() {
+export function getUserList() {
   return request({
     url: '/system/user',
     method: 'get'
@@ -20,5 +20,15 @@ export function getInfo(token) {
     url: '/system/user/info',
     method: 'get'
     // params: { token }
+  })
+}
+
+export function addUser(user) {
+  user = JSON.stringify(user)
+  console.log(user)
+  return request({
+    url: '/system/user',
+    method: 'post',
+    user
   })
 }

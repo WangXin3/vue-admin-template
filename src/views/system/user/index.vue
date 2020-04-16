@@ -22,19 +22,19 @@
           <el-select v-model="user.roles" multiple placeholder="请选择">
             <el-option
               v-for="item in roles"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
+              :key="item.id"
+              :label="item.description"
+              :value="item.id"
             />
           </el-select>
         </el-form-item>
         <el-form-item label="性别" label-width="90px" size="medium" prop="gender">
-          <el-radio v-model="user.gender" label="1">男</el-radio>
-          <el-radio v-model="user.gender" label="2">女</el-radio>
+          <el-radio v-model="user.gender" :label="1">男</el-radio>
+          <el-radio v-model="user.gender" :label="2">女</el-radio>
         </el-form-item>
         <el-form-item label="状态" label-width="90px" size="medium" prop="enabled">
-          <el-radio v-model="user.enabled" label="1">激活</el-radio>
-          <el-radio v-model="user.enabled" label="2">禁用</el-radio>
+          <el-radio v-model="user.enabled" :label="true">激活</el-radio>
+          <el-radio v-model="user.enabled" :label="false">禁用</el-radio>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -135,7 +135,8 @@
 </template>
 
 <script>
-import { getList } from '@/api/system/user'
+import { getUserList, addUser } from '@/api/system/user'
+import { getRoleList } from '@/api/system/role'
 
 export default {
   name: 'Index',
@@ -149,8 +150,8 @@ export default {
         nickname: '',
         email: '',
         roles: [],
-        gender: '1',
-        enabled: '1'
+        gender: 1,
+        enabled: true
       },
       dialogFormVisible: false,
 
@@ -171,14 +172,12 @@ export default {
         gender: [],
         enabled: []
       },
-      roles: [
-        { value: 'admin', label: '超级管理员' },
-        { value: 'user', label: '用户' }
-      ]
+      roles: []
     }
   },
   created() {
     this.fetchData()
+    this.loadRole()
   },
   methods: {
     // 编辑用户
@@ -189,7 +188,7 @@ export default {
     // 加载数据
     fetchData() {
       this.listLoading = true
-      getList().then(response => {
+      getUserList().then(response => {
         this.tableData = response.data
         this.listLoading = false
       })
@@ -221,8 +220,20 @@ export default {
     addUser(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          alert('submit!')
-          this.dialogFormVisible = false
+          // 处理roles
+          this.user.roles = this.user.roles.map(role => {
+            return { 'id': role }
+          })
+
+          addUser(this.user).then(response => {
+            if (response.code === 200) {
+              this.$message({
+                type: 'success',
+                message: '添加成功!'
+              })
+              this.dialogFormVisible = false
+            }
+          })
         } else {
           console.log('error submit!!')
           return false
@@ -234,6 +245,13 @@ export default {
     close() {
       this.dialogFormVisible = false
       this.$refs.user.resetFields()
+    },
+
+    // 加载角色
+    loadRole() {
+      getRoleList().then(response => {
+        this.roles = response.data
+      })
     }
   }
 }
