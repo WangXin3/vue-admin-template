@@ -1,9 +1,10 @@
 import request from '@/utils/request'
 
-export function getUserList() {
+export function getUserList(pageNum, pageSize) {
   return request({
     url: '/system/user',
-    method: 'get'
+    method: 'get',
+    params: { pageNum: pageNum, pageSize: pageSize }
   })
 }
 
@@ -28,5 +29,13 @@ export function addUser(user) {
     url: '/system/user',
     method: 'post',
     data: user
+  })
+}
+
+export function delUser(users) {
+  return request({
+    url: '/system/user',
+    method: 'delete',
+    data: users
   })
 }

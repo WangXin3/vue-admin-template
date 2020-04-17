@@ -3,7 +3,7 @@
     <el-row>
       <el-col>
         <el-button type="primary" @click="dialogFormVisible = true">添加</el-button>
-        <el-button type="danger" :disabled="selectData.length === 0" @click="deleteUser(selectData)">删除</el-button>
+        <el-button type="danger" :disabled="selectData.length === 0" @click="deleteUser(selectData, 1)">删除</el-button>
       </el-col>
     </el-row>
 
@@ -118,7 +118,7 @@
           >
             <template slot-scope="scope">
               <el-button type="text" size="small" @click="handleClick(scope.row)">编辑</el-button>
-              <el-button type="text" size="small" @click="deleteUser(scope.row)">删除</el-button>
+              <el-button type="text" size="small" @click="deleteUser(scope.row, 2)">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -126,7 +126,10 @@
           <el-pagination
             background
             layout="prev, pager, next"
-            :total="100"
+            :current-page="pager.pageNum"
+            :page-size="pager.pageSize"
+            :page-count="pager.pageCount"
+            @current-change="pageChange"
           />
         </div>
       </el-col>
@@ -135,13 +138,18 @@
 </template>
 
 <script>
-import { getUserList, addUser } from '@/api/system/user'
+import { getUserList, addUser, delUser } from '@/api/system/user'
 import { getRoleList } from '@/api/system/role'
 
 export default {
   name: 'Index',
   data() {
     return {
+      pager: {
+        pageNum: 1,
+        pageSize: 5,
+        pageCount: 0
+      },
       tableData: [],
       listLoading: true,
       selectData: [],
@@ -188,8 +196,11 @@ export default {
     // 加载数据
     fetchData() {
       this.listLoading = true
-      getUserList().then(response => {
-        this.tableData = response.data
+      getUserList(this.pager.pageNum, this.pager.pageSize).then(response => {
+        this.tableData = response.data.list
+        this.pager.pageCount = response.data.pages
+        this.pager.pageNum = response.data.pageNum
+        this.pager.pageSize = response.data.pageSize
         this.listLoading = false
       })
     },
@@ -200,16 +211,26 @@ export default {
     },
 
     // 删除用户
-    deleteUser(users) {
+    deleteUser(users, type) {
+      if (type === 2) {
+        users = [users]
+      }
+
       this.$confirm('此操作将永久删除该用户, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        console.log(users)
-        this.$message({
-          type: 'success',
-          message: '删除成功!'
+        delUser(users).then(response => {
+          if (response.code === 200) {
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            })
+            // 避免全删本页所有数据导致的bug
+            this.pager.pageNum = 1
+            this.fetchData()
+          }
         })
       }).catch(() => {
 
@@ -253,6 +274,11 @@ export default {
       getRoleList().then(response => {
         this.roles = response.data
       })
+    },
+
+    pageChange(val, e, form, jobExpLabel, pageform, searchVal) {
+      this.pager.pageNum = val
+      this.fetchData()
     }
   }
 }
