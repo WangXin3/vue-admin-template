@@ -24,11 +24,9 @@ export function getInfo(token) {
 }
 
 export function addUser(user) {
-  user = JSON.stringify(user)
-  console.log(user)
   return request({
     url: '/system/user',
     method: 'post',
-    user
+    data: user
   })
 }
