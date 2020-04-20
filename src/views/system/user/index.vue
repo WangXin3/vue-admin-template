@@ -18,8 +18,8 @@
         <el-form-item label="邮箱" label-width="90px" size="medium" prop="email" required>
           <el-input v-model="user.email" placeholder="请输入Email" />
         </el-form-item>
-        <el-form-item label="角色" label-width="90px" size="medium" prop="roles" required>
-          <el-select v-model="user.roles" multiple placeholder="请选择">
+        <el-form-item label="角色" label-width="90px" size="medium" prop="tempRoles" required>
+          <el-select v-model="user.tempRoles" multiple placeholder="请选择">
             <el-option
               v-for="(item, index) in roles"
               :key="index"
@@ -150,7 +150,6 @@
 <script>
 import { getUserList, addUser, delUser, editUser } from '@/api/system/user'
 import { getRoleList } from '@/api/system/role'
-import { deepClone2 } from '@/utils/ObjectUtil'
 
 export default {
   name: 'Index',
@@ -169,6 +168,7 @@ export default {
         nickname: '',
         email: '',
         roles: [],
+        tempRoles: [],
         gender: 1,
         enabled: true
       },
@@ -185,7 +185,7 @@ export default {
           { required: true, message: '请输入邮箱地址', trigger: 'blur' },
           { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
         ],
-        roles: [
+        tempRoles: [
           { required: true, message: '请选择角色', trigger: 'change' }
         ],
         gender: [],
@@ -201,8 +201,8 @@ export default {
   methods: {
     // 编辑用户
     handleClick(row) {
-      this.user = deepClone2(row)
-      this.user.roles = this.user.roles.map(role => {
+      this.user = row
+      this.user.tempRoles = this.user.roles.map(role => {
         return role.id
       })
       this.dialogFormVisible = true
@@ -210,9 +210,12 @@ export default {
 
     // 加载数据
     fetchData() {
+      this.tableData = []
       this.listLoading = true
       getUserList(this.pager.pageNum, this.pager.pageSize).then(response => {
-        this.tableData = response.data.list
+        response.data.list.map(item => {
+          this.tableData.push(Object.assign({}, item, { tempRoles: [] }))
+        })
         this.pager.pageCount = response.data.pages
         this.pager.pageNum = response.data.pageNum
         this.pager.pageSize = response.data.pageSize
@@ -257,7 +260,7 @@ export default {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           // 处理roles
-          this.user.roles = this.user.roles.map(role => {
+          this.user.roles = this.user.tempRoles.map(role => {
             return { 'id': role }
           })
 
@@ -269,9 +272,9 @@ export default {
                   type: 'success',
                   message: '编辑成功!'
                 })
-                this.dialogFormVisible = false
-                this.fetchData()
               }
+              this.dialogFormVisible = false
+              this.fetchData()
             })
           } else {
             // 新增
@@ -302,6 +305,7 @@ export default {
         nickname: '',
         email: '',
         roles: [],
+        tempRoles: [],
         gender: 1,
         enabled: true
       }
