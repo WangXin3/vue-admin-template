@@ -39,3 +39,11 @@ export function delUser(users) {
     data: users
   })
 }
+
+export function editUser(users) {
+  return request({
+    url: '/system/user',
+    method: 'put',
+    data: users
+  })
+}

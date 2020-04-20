@@ -21,8 +21,8 @@
         <el-form-item label="角色" label-width="90px" size="medium" prop="roles" required>
           <el-select v-model="user.roles" multiple placeholder="请选择">
             <el-option
-              v-for="item in roles"
-              :key="item.id"
+              v-for="(item, index) in roles"
+              :key="index"
               :label="item.description"
               :value="item.id"
             />
@@ -101,6 +101,16 @@
             min-width="150"
           />
           <el-table-column
+            prop="roles"
+            label="角色"
+            align="center"
+            min-width="150"
+          >
+            <template slot-scope="scope">
+              <el-tag v-for="(role, index) in scope.row.roles" :key="index" type="warning">{{ role.description }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column
             label="状态"
             align="center"
             min-width="150"
@@ -138,8 +148,9 @@
 </template>
 
 <script>
-import { getUserList, addUser, delUser } from '@/api/system/user'
+import { getUserList, addUser, delUser, editUser } from '@/api/system/user'
 import { getRoleList } from '@/api/system/role'
+import { deepClone2 } from '@/utils/ObjectUtil'
 
 export default {
   name: 'Index',
@@ -190,7 +201,11 @@ export default {
   methods: {
     // 编辑用户
     handleClick(row) {
-      console.log(row)
+      this.user = deepClone2(row)
+      this.user.roles = this.user.roles.map(role => {
+        return role.id
+      })
+      this.dialogFormVisible = true
     },
 
     // 加载数据
@@ -237,7 +252,7 @@ export default {
       })
     },
 
-    // 新增用户
+    // 新增/编辑用户
     addUser(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
@@ -246,16 +261,31 @@ export default {
             return { 'id': role }
           })
 
-          addUser(this.user).then(response => {
-            if (response.code === 200) {
-              this.$message({
-                type: 'success',
-                message: '添加成功!'
-              })
-              this.dialogFormVisible = false
-              this.fetchData()
-            }
-          })
+          if (this.user.id) {
+            // 编辑
+            editUser(this.user).then(response => {
+              if (response.code === 200) {
+                this.$message({
+                  type: 'success',
+                  message: '编辑成功!'
+                })
+                this.dialogFormVisible = false
+                this.fetchData()
+              }
+            })
+          } else {
+            // 新增
+            addUser(this.user).then(response => {
+              if (response.code === 200) {
+                this.$message({
+                  type: 'success',
+                  message: '添加成功!'
+                })
+                this.dialogFormVisible = false
+                this.fetchData()
+              }
+            })
+          }
         } else {
           console.log('error submit!!')
           return false
@@ -267,6 +297,14 @@ export default {
     close() {
       this.dialogFormVisible = false
       this.$refs.user.resetFields()
+      this.user = {
+        username: '',
+        nickname: '',
+        email: '',
+        roles: [],
+        gender: 1,
+        enabled: true
+      }
     },
 
     // 加载角色
