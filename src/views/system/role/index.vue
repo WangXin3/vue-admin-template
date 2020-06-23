@@ -74,10 +74,10 @@
             </div>
             <div>
               <el-tree
+                ref="tree"
                 :data="menuData"
                 show-checkbox
                 node-key="id"
-                ref="tree"
                 :props="defaultProps"
                 check-strictly
               />
