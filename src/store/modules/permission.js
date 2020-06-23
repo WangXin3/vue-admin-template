@@ -1,5 +1,5 @@
 import { constantRoutes } from '@/router'
-import { buildMenus } from '@/api/menu'
+import { buildMenus } from '@/api/system/menu'
 import Layout from '@/layout/index'
 
 /**

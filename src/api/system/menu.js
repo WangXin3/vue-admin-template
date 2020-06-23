@@ -38,4 +38,9 @@ export function edit(data) {
   })
 }
 
-export default { add, edit, del, getMenusTree }
+export function getMenusTreeByRoleId(roleId) {
+  return request({
+    url: 'system/menu/tree/' + roleId,
+    method: 'get'
+  })
+}

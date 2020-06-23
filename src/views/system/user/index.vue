@@ -327,7 +327,7 @@ export default {
 </script>
 
 <style scoped>
-.el-row {
-  margin-bottom:20px
-}
+  .el-row {
+    margin-bottom:20px
+  }
 </style>

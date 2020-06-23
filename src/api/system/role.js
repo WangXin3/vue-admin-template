@@ -6,3 +6,11 @@ export function getRoleList() {
     method: 'get'
   })
 }
+
+export function getRoleListPage(pageNum, pageSize) {
+  return request({
+    url: '/system/role/roleListPage',
+    method: 'get',
+    params: { pageNum: pageNum, pageSize: pageSize }
+  })
+}
